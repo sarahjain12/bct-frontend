@@ -1,0 +1,96 @@
+<!doctype html>
+<form nz-form [formGroup]="searchForm" (ngSubmit)="onSubmit()" class="ant-advanced-search-form">
+  <div nz-row [nzGutter]="16">
+    <div nz-col [nzSpan]="8">
+    <nz-form-item>
+      <nz-form-control>
+        <span nz-row>Event/ Market/ Option
+          <nz-radio-group id="modeRadioGroupId" formControlName="mode" nz-row>
+            <label id="modeRadioId" nz-radio nzValue="0">AND</label>
+            <label id="modeRadioId" nz-radio nzValue="1">OR</label>
+            </nz-radio-group>
+          </span>
+        <nz-input-group class="search-input-group">
+          <nz-select style="width: auto" nzSuffixIcon="caret-down" nzType="caret-down" nzTheme="outline" nzAllowClear nzPlaceHolder="Select"
+            formControlName="offerType" id="offerType">
+            <nz-option *ngFor="let item of offerTypes" [nzLabel]="item.viewValue" [nzValue]="item"></nz-option>
+          </nz-select>
+          <nz-form-control nzErrorTip="The value entered is not valid">
+          <input type="text" nz-input formControlName="offerId" placeholder="Search by ID" id="offerId"/>
+        </nz-form-control>
+        </nz-input-group>
+        </nz-form-control>
+    </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-control nzErrorTip="The value entered is not valid">
+          <span>Account Name/ User ID</span>
+          <input type="text" nz-input formControlName="accountName"
+           placeholder="Search By AccountName/ User Id">
+        </nz-form-control>
+      </nz-form-item>
+      </div>
+    <div nz-col [nzSpan]="8">
+    <nz-form-item>
+      <nz-form-control nzErrorTip="The value entered is not valid">
+        <span>Bet Number</span>
+        <input type="text" nz-input formControlName="betnumber" placeholder="Search By Bet Number" (change)="exclusiveEnable('betnumber')"/>
+      </nz-form-control>
+    </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Sport</span>
+          <nz-input-group class="search-input-group">
+            <nz-select style="width: auto" nzSuffixIcon="caret-down" formControlName="tradingPartition"
+                       (ngModelChange)="onChangeTradingPartition()">
+              <nz-option *ngFor="let tp of tradingPartitions" [nzLabel]="tp.viewValue" [nzValue]="tp"></nz-option>
+            </nz-select>
+            <nz-select nzSuffixIcon="caret-down" nzAllowClear nzPlaceHolder="select sport" formControlName="sportId">
+              <nz-option *ngFor="let sport of sports" [nzLabel]="sport.viewValue" [nzValue]="sport"></nz-option>
+            </nz-select>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="8">
+    <nz-form-item>
+      <nz-form-control>
+        <span>Charge ID</span>
+        <input type="number" nz-input formControlName="chargeId" placeholder="Search By Charge ID" (change)="exclusiveEnable('chargeId')"
+       >
+      </nz-form-control>
+    </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="8">
+    <nz-form-item>
+      <nz-form-control>
+        <span>Timestamp</span>
+        <nz-input-group class="search-input-group">
+        <nz-date-picker nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="timestampFrom"
+          placeholder="Select"></nz-date-picker>
+        <nz-date-picker nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="timestampTo"
+          placeholder="Select"></nz-date-picker>
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+    </div>
+  </div>
+ <app-advanced-search #advancedSearch></app-advanced-search>
+  <div nz-row>
+    <button id="searchButtonId" nz-button nzType="primary" type="submit" [disabled]="!searchForm.valid">Search</button>
+    <button id="searchButtonId" nz-button nzType="primary" type="button" (click)="resetForm()">Clear All</button>
+    <button id="downloadButtonId" nz-button nzType="primary" type="button" [nzSize]="size" (click)="downloadExcel()" [disabled]="this.disableDownloadExcel"> 
+    <span nz-icon nzType="download"></span>
+    </button>
+    <div *ngIf="this.disableDownloadExcel" nz-col [nzSpan]="24">
+      <h5 id="downloadExcel">
+        You cannot export excel in the batch mode. Narrow down and go to grid
+      </h5>
+    </div>
+    <label *ngIf="hasAdminPermissions" id="manipulateOlderBetsCheckboxId" nz-checkbox formControlName="_manipulateOlderBets">Manipulate older bets</label>
+  </div>
+</form>
+<app-search-result (disableDownloadExcelChanged)="onDisableExcelDownloadChange($event)"></app-search-result>

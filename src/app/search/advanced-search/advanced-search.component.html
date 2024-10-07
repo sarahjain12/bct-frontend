@@ -1,0 +1,126 @@
+<nz-card [formGroup]="searchFormGroup" [nzBordered]="false">
+  <div nz-col [nzSpan]="8">
+    <button id="advancedSearchPanelCollapseButtonId" type="button"
+            nz-button (click)="toggleAdvancedSearchPanel()">
+      <span nz-icon nzType="{{isAdvancedSearchPanelCollapsed ? 'down' : 'right'}}"></span>
+      Advanced Filters
+    </button>
+  </div>
+  <div formGroupName="advancedSearch" nz-row [nzGutter]="16" [hidden]="!isAdvancedSearchPanelCollapsed">
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Bet Status</span>
+          <nz-select nzSuffixIcon="caret-down" nzAllowClear nzMode="multiple" nzPlaceHolder="Select Bet Status"
+                     formControlName="betStatus" (ngModelChange)="onChangeBetStatus()">
+            <nz-option *ngFor="let bs of betStatus" [nzLabel]="bs.viewValue" [nzValue]="bs"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Cashout Status</span>
+          <nz-select nzSuffixIcon="caret-down" nzAllowClear nzPlaceHolder="Select Cashout Status"
+                     formControlName="cashoutStatus" (ngModelChange)="onChangeCashoutStatus()">
+            <nz-option *ngFor="let cs of cashoutStatus" [nzLabel]="cs.viewValue" [nzValue]="cs"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Slip Languages</span>
+          <nz-select nzSuffixIcon="caret-down" nzAllowClear nzPlaceHolder="Select Slip Languages"
+                     formControlName="slipLanguage">
+            <nz-option *ngFor="let sl of slipLanguages" [nzLabel]="sl.viewValue" [nzValue]="sl"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Bet Type</span>
+          <nz-select nzSuffixIcon="caret-down" nzAllowClear nzPlaceHolder="Select Bet Type"
+                     formControlName="betType">
+            <nz-option *ngFor="let bt of betType" [nzLabel]="bt.viewValue" [nzValue]="bt"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Bet Label</span>
+          <ng-multiselect-dropdown
+            [placeholder]="'Select Bet Label'"
+            [settings]="dropdownSettings"
+            [data]="betLabels"
+            (onSelect)="onItemSelect($event)"
+            (onSelectAll)="onSelectAll($event)"
+            formControlName = "betLabel"
+          >
+          </ng-multiselect-dropdown>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control nzErrorTip="The value entered is not valid">
+          <span>Odds</span>
+          <nz-input-group class="advanced-search-input-group">
+            <input type="text" nz-input formControlName="oddsFrom" placeholder="From">
+            <input type="text" nz-input formControlName="oddsTo" placeholder="To">
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>SGP Re-pricing Status</span>
+          <nz-select nzSuffixIcon="caret-down" nzAllowClear nzPlaceHolder="Select SGP Repricing Status"
+                     formControlName="repricingStatus">
+            <nz-option *ngFor="let rs of repricingStatus" [nzLabel]="rs.viewValue" [nzValue]="rs"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-form-item>
+        <nz-form-control>
+          <span>Pending repricing since (minutes)</span>
+          <input type="number" nz-input formControlName="repricingPendingSinceMins" placeholder="Search By Pending Repricing Mins">
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-input-group class="advanced-search-input-group">
+            <input type="checkbox" nz-input formControlName="fullOGP" unchecked><span style="white-space: nowrap;">Expand SGP</span>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+  <div style="float: left" *ngIf="queryLength > 0">
+    <div nz-row *ngIf="!isAdvancedSearchPanelCollapsed">
+      <div *ngFor="let query of queries; let queryIndex = index"
+           class="active-search-parameter">
+        {{ query.name }}:
+        <nz-tag class="active-search-tag"
+                *ngFor="let queryData of query.data; let queryDataIndex = index"
+                [ngClass]="{'overflowStyleBetLabels': query.name=='Bet Labels'}"
+                nzMode="closeable" (nzOnClose)="onRemoveOne(queryIndex, queryDataIndex)"
+                [nzColor]="'#43268B'">
+          {{ createTagName(queryData) }}
+        </nz-tag>
+      </div>
+      <a nz-button nzType="link" (click)="onRemoveAll()">Remove All</a>
+    </div>
+  </div>
+</nz-card>

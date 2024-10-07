@@ -1,0 +1,18 @@
+.ant-page-header {
+  padding: 0px 20px;
+}
+
+::ng-deep .ant-table-content .ant-table-thead .ant-table-row {
+    justify-content: initial !important;
+}
+::ng-deep .ant-table-custom-column .ant-table-tbody .ant-table-row {
+    justify-content: initial !important;
+}
+
+.ant-table-thead > tr > th, .ant-table-tbody > tr > td, .ant-table tfoot > tr > th, .ant-table tfoot > tr > td {
+    padding: 5px !important;
+}
+
+.ant-table-thead > tr > th, .ant-table-tbody > tr > td, .ant-table tfoot > tr > th, .ant-table tfoot > tr > td {
+    padding: 5px !important;
+}

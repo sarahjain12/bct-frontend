@@ -1,0 +1,101 @@
+image: bpty-docker-local.artifactory.bwinparty.corp/b2d-dotnetcore-fortify:7.0
+
+stages:
+  - install_n_build_dev
+  - disme_upload
+  - tag
+variables:
+  TAG_NAME: "bctui"
+
+CI:
+  stage: install_n_build_dev
+  tags:
+    - linux-docker-runner
+  script:
+    - rm -rf node_modules
+    - echo "20.10.0" > .nvmrc
+    - nvm use
+    - npm config set legacy-peer-deps true
+    - npm install
+    - npm install -g @angular/cli@17.1.0
+    - ng build
+  when: always
+  artifacts:
+    paths:
+      - dist/
+  cache:
+    paths:
+      - node_modules/
+
+
+Disme:
+  stage: disme_upload
+  tags:
+    - linux-docker-runner
+  script:
+    - ls
+    - tar cvzf dist.tar.gz dist
+    - /opt/MyLittleToolchain/toolchain disme upload
+      --api-key "$DismeServiceApiKey"
+      --shortcut BCT-UI
+      --file dist.tar.gz
+      --document-name "Bet Correction Tool-UI"
+  when: on_success
+  only :
+    - main
+  allow_failure: false
+  dependencies: [ "CI" ]
+  needs: [ "CI" ]
+
+Disme-Release:
+  stage: disme_upload
+  tags:
+    - linux-docker-runner
+  script:
+    - git fetch --tags
+    - TAG_NAME=$(git tag --list | sort -V | tail -n1).tar.gz
+    - echo $TAG_NAME
+    - ls
+    - tar cvzf $TAG_NAME dist
+    - /opt/MyLittleToolchain/toolchain disme upload
+      --api-key "$DismeServiceApiKey"
+      --shortcut BCT-UI
+      --file $TAG_NAME
+      --document-name "Bet Correction Tool-UI"
+  when: on_success
+  only:
+    - /^v.*$/
+  allow_failure: false
+  dependencies: [ "CI" ]
+  needs: [ "CI" ]
+
+# A job to cut a new release
+# This will run before our deployment
+Create-Tag:
+  # This is part of the release stage
+  stage: tag
+  # Only attempt to run this job when we merge to the main branch
+  only:
+   refs:
+    - main
+    - alpha
+      # This matches maintenance branches
+      #Refer https://github.com/semantic-release/semantic-release/blob/master/docs/usage/configuration.md#branches
+    - /^(([0-9]+)\.)?([0-9]+)\.x/
+      # This matches pre-releases
+    - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
+  script:
+    - echo "20.10.0" > .nvmrc
+    - nvm use
+    - npm i -g semantic-release @semantic-release/gitlab @semantic-release/changelog @semantic-release/git @semantic-release/npm @semantic-release/commit-analyzer
+      conventional-changelog-conventionalcommits @semantic-release/exec
+    - npx semantic-release
+  # Add the runner that will execute this job
+  tags:
+    - linux-docker-runner
+  dependencies: [ "CI" ]
+  when: manual
+  allow_failure: false
+  needs: [ "CI" ]
+
+

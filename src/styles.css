@@ -1,0 +1,10 @@
+  /* You can add global styles to this file, and also import other style files */
+
+  body {
+    font-family: Mulish;
+    font-size: 12px;
+  }
+
+  .ng-invalid.ng-dirty:not(form), .ng-invalid:not(form).form-submitted {
+    border: solid 1px red;
+  }

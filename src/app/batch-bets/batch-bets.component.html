@@ -1,0 +1,39 @@
+<div *ngIf="betResponse && betResponse.numberOfResults > this.batch_count && betResponse.useBatchMode">
+    <nz-table #batchResultsTable [nzBordered]="true" [nzData]="betsBreakdownMap" [nzShowPagination]="false"
+      [nzFrontPagination]="false" nzTableLayout="auto" class="batch-bets-table">
+      <thead>
+        <tr>
+            <th *ngIf="hasWritePermissions" nzColumn nzTitle="Select">
+            Select
+          </th>
+          <th nzColumn nzTitle="Number of bets breakdown">
+            Number of bets breakdown
+          </th>
+          <th nzColumn nzTitle="Bet state breakdown">
+            Bet state breakdown
+          </th>
+          <th nzColumn nzTitle="Winnings">
+            Winnings
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of batchResultsTable.data; let betsBreakDownKeyIndex = index">
+          <td *ngIf="hasWritePermissions" nzColumn nzTitle="Select" nzDataIndex="select">
+            <label nz-checkbox (nzCheckedChange)="selectBatchBetsToCancel(entry[1].betStatus,
+            entry[1].numberOfBets, entry[1].offerSourceSystem, entry[1].labels, $event)">
+            </label>
+          </td>
+          <td nzColumn nzTitle="Number of bets" nzDataIndex="numberOfBets">
+            {{ entry[1].numberOfBets }}
+          </td>
+          <td nzColumn nzTitle="Bet status" nzDataIndex="betStatus">
+            {{ entry[1].betStatus }}
+          </td>
+          <td nzColumn nzTitle="Winnings" nzDataIndex="winnings">
+            {{ entry[1].winnings }}
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>

@@ -1,0 +1,51 @@
+<div *ngIf="showSearchResultsCount && resultCount > 0" nz-col [nzSpan]="24">
+  <h3 id="searchResultsLabelId">
+    Search Results ({{this.resultCount}} Bets found)
+  </h3>
+</div>
+<div *ngIf="betResponse && betResponse.tooManyBets" nz-col [nzSpan]="24">
+  <h5 id="searchResultsLabelId">
+    Too many bets matching your search criteria found.
+    Please use the advanced search options to refine the search.
+  </h5>
+</div>
+<div *ngIf="resultCount == 0 && betResponse && !betResponse.tooManyBets" nz-col [nzSpan]="24">
+  <h5 id="searchResultsLabelId">
+    Search Results ({{this.resultCount}} Bets found)
+    If searching for a V2 or V3 or V4 or V5 or V6 bet please input platform (V2/V3/V4/V5/V6) and Sport
+  </h5>
+</div>
+
+<div *ngIf="betResponse && resultCount > this.batch_count && !betResponse.useBatchMode">
+  <nz-table #basicTable [nzBordered]="true" [nzShowPagination]="false" [nzFrontPagination]="false"
+    [nzShowSizeChanger]="false" nzTableLayout="auto">
+    <tbody>
+      <tr>
+        <td style="padding-left: 35px;">
+          <b>
+            The application cannot display more than {{ this.batch_count }} bets at once.
+            <br />
+            Please use the advanced search options to refine the search.
+            <ng-container *ngIf="tradingPartition !== 1 && offerId">
+              <br />
+              <a id="batchHandlingViewLink" (click)="onCilckBatchViewLink()">
+                Or click here to switch to the "Batch handling view."
+              </a>
+              <ng-container *ngIf="offerType === 'result'">
+                <br /><br />
+                Note: Special regulation may apply for bets from Italian labels. Please use search by
+                Event ID or Game ID when attempting to cancel these bets.
+              </ng-container>
+            </ng-container>
+          </b>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>
+<div *ngIf="showLoader" id="loading-text-center">
+  <nz-spin nzTip="Loading..." nzSimple [nzSize]="'large'"></nz-spin>
+</div>
+<nz-divider></nz-divider>
+<app-grid-bets></app-grid-bets>
+<app-batch-bets></app-batch-bets>

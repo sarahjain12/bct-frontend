@@ -1,0 +1,226 @@
+<app-actions [currentBets]="allBets">
+</app-actions>
+<div *ngIf="betResponse && betResponse.numberOfResults > 0 && betResponse.numberOfResults <= this.batch_count">
+  <nz-table #basicTable [nzBordered]="true" [nzData]="allBets" [nzShowPagination]="false" [nzFrontPagination]="false"
+    [nzShowSizeChanger]="false" nzTableLayout="auto" [nzCustomColumn]="customColumn">
+    <thead>
+      <tr>
+        <th *ngIf="hasWritePermissions" nzCellControl="checkbox"></th>
+        <th nzCellControl="AccountName">AccountName<br/>(Show Balance)</th>
+        <th nzCellControl="BetNumber">Betslip - Type</th>
+        <th nzCellControl="TimeStampSlipUTC">Bet Placed <br/> UTC <br/> CET </th>
+        <th nzCellControl="CancellationStatus">Correction Status / ChargeId</th>
+        <th nzCellControl="CancellationTimestamp">Correction Time / By agent</th>
+        <th nzCellControl="Event/Fixture">Event * (Value contains League - Event - Start Date)</th>
+        <th nzCellControl="Game/Market">Market</th>
+        <th nzCellControl="Result/Participant">Selection - Trading Payout UTC</th>
+        <th nzCellControl="Stake">Stake EUR</th>
+        <th nzCellControl="StakeLC">Stake User</th>
+        <th nzCellControl="TOdds">Odds</th>
+        <th nzCellControl="SGPGroup">SGP Group - Status / ID / Decimal Odds / US odds / Repricing Pending Since</th>
+        <th nzCellControl="TimestampPayout">Timestamp Payout</th>
+        <th nzCellControl="ROdds-dec">UK Odds</th>
+        <th nzCellControl="ROdds-frac">US Odds</th>
+        <th nzCellControl="Label">Label</th>
+        <th nzCellControl="Sport/Region">Sport - Region</th>
+
+        <!-- Might require at a later point of time by product.. Will delete them after first release. -->
+
+        <!--        <th nzCellControl="UserId">UserId</th>
+                <th nzCellControl="SlipLanguage">Slip<br />Language</th>
+                <th nzCellControl="TimeStampSlip">TimeStampSlip</th>
+                <th nzCellControl="Bettype">Bettype</th>
+                <th nzCellControl="League/Meeting">League/Meeting<br />Event/Fixture Timestamp</th>
+                <th nzCellControl="SlipId">SlipID</th>
+                <th nzCellControl="SystemSlipID">SystemSlipID</th>-->
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bets of basicTable.data | keyvalue; index as i">
+        <td *ngIf="hasWritePermissions" nzCellControl="checkbox">
+          <span *ngIf="bets.value.updatableInfo.canBeProcessed && bets.value.identifier.canBeCanceled && !bets.value.lockedByEditBet">
+            <label nz-checkbox [nzChecked]="setOfCheckedId.has(bets.value.identifier.key.betId)"
+              [nzDisabled]="bets.value.updatableInfo.epCanBeProcessed && !bets.value.betEPData.epLabelEnabled"
+              (nzCheckedChange)="selectToCancel(bets.value.identifier.key.betId, bets.value, $event)">
+            </label>
+            <br />
+            <span *ngIf="bets.value.updatableInfo.epCanBeProcessed">EP
+              <label nz-checkbox [nzChecked]="setOfEPCheckedId.has(bets.value.identifier.key.betId)"
+                [nzDisabled]="!bets.value.betEPData.epLabelEnabled"
+                (nzCheckedChange)="epToCancel(bets.value.identifier.key.betId, bets.value, $event)"></label>
+            </span>
+            <span *ngIf="bets.value.updatableInfo.epReserved">REP
+              <label nz-checkbox [nzChecked]="setOfREPCheckedId.has(bets.value.identifier.key.betId)"
+                [nzDisabled]="!bets.value.betEPData.epLabelEnabled"
+                (nzCheckedChange)="repToCancel(bets.value.identifier.key.betId, bets.value, $event)">
+              </label>
+            </span>
+          </span>
+          <span *ngIf="bets.value.updatableInfo.canBeProcessed && bets.value.identifier.canBeCanceled && bets.value.lockedByEditBet">
+            <img src="assets/icon2.svg">
+          </span>
+        </td>
+        <td nzCellControl="AccountName">
+          <span id="{{'name_span_'+i+'_'+bets.value.userId}}">
+            <a class="link-underline-info" id="{{'name_'+i+'_'+bets.value.userId}}"
+              (click)="getAccountName(bets.value.userId)">{{ bets.value.accountName }}</a>
+          </span>
+          <span id="{{'balance_span_'+i+'_'+bets.value.userId}}">
+            <a class="link-underline-info" id="{{'balance_'+i+'_'+bets.value.userId}}"
+              (click)="getAccountBalance(bets.value.userId)">Account Balance</a>
+          </span>
+        </td>
+        <td nzCellControl="BetNumber">
+          <span>{{bets.value.betNumber}}</span>
+          <span *ngIf="bets.value.identifier.key.systemSlipId!=null">System</span>
+          <span *ngIf="bets.value.isNonMaterializedSystem == 1; else showThis">System non-materialized</span>
+          <ng-template #showThis>
+            {{bets.value.type}}
+          </ng-template>
+          <span *ngIf="bets.value.isFreeBet > 0">(F)</span>
+          <span *ngIf="bets.value.numberOfProtectedResults !=''">
+            <br />Protected picks: {{bets.value.numberOfProtectedResults}}
+            <br />Fee: {{bets.value.betCurrency.protectionFeeBaseCurrency}} {{bets.value.betCurrency.protectionFeeAccountCurrency}}
+          </span>
+        </td>
+        <td nzCellControl="TimeStampSlipUTC"> {{bets.value.betSlipData.slipTimestampUtc}} <br/> <br/> {{bets.value.betSlipData.slipTimestamp}}</td>
+        <td nzCellControl="CancellationStatus">
+          <span *ngIf="bets.value.updatableInfo.epCancelStatusLabel !== ''; else epCancelText">
+            {{ bets.value.updatableInfo.epCancelStatusLabel }}
+          </span>
+          <ng-template #epCancelText>
+            {{ bets.value.betEPData.epCancelStatusText }}
+          </ng-template>
+          <span *ngIf="bets.value.updatableInfo.cancelStatusLabel !== ''; else elseBlock">
+            {{ bets.value.updatableInfo.cancelStatusLabel }}
+          </span>
+          <ng-template #elseBlock>
+            {{ bets.value.stornoStatusText }}
+          </ng-template>
+          <span *ngIf="bets.value.updatableInfo.chargeId!=''">
+            {{bets.value.updatableInfo.chargeId}}
+          </span>
+        </td>
+        <td nzCellControl="CancellationTimestamp">
+          <span *ngIf="bets.value.updatableInfo.lastUpdateCancellationTimestamp!==null">
+            {{bets.value.updatableInfo.lastUpdateCancellationTimestamp}} <br />
+            {{bets.value.updatableInfo.lastUpdateStatusBetBy}}<br />
+          </span>
+          <span *ngIf="bets.value.identifier.epCancelStatusId!=='' || bets.value.identifier.epStatusId!==''">
+            {{bets.value.updatableInfo.epCancelTimestamp}} <br />
+            {{bets.value.updatableInfo.epCancelledBy}}
+          </span>
+        </td>
+        <td nzCellControl="Event/Fixture">
+          {{bets.value.betTradingData.eventName}}<br />{{ bets.value.betTradingData.eventId }}<br/>
+          {{bets.value.betTradingData.leagueName}} <br /> {{bets.value.betTradingData.eventDate}}
+        </td>
+        <td nzCellControl="Game/Market">{{bets.value.betTradingData.gameName}}<br />{{ bets.value.betTradingData.gameId }}<br />
+          <span *ngIf="bets.value.identifier.isExtended">
+            {{bets.value.betSlipData.slipAAMSTimestamp}}
+          </span>
+        </td>
+        <td nzCellControl="Result/Participant">
+          <span
+            *ngIf="bets.value.betTradingData.resultName">{{bets.value.betTradingData.resultName}}<br />{{bets.value.identifier.key.resultId}}<br /></span>
+          <span *ngFor="let participantPrice of bets.value.betTradingData.participantPrices">
+            {{participantPrice.participantName}}<br />
+            {{participantPrice.priceId}}
+          </span>
+          <span *ngIf="bets.value.betTradingData.optionPrice!='' && bets.value.betTradingData.optionPrice!==null">
+            {{bets.value.betTradingData.optionPrice.optionName}}<br />
+            {{bets.value.betTradingData.optionPrice.priceId}}
+          </span>
+        </td>
+        <td nzCellControl="Stake"> {{ bets.value.betCurrency.stake }}</td>
+        <td nzCellControl="StakeLC"> {{ bets.value.betCurrency.stakeLocalCurrency}}</td>
+        <td nzCellControl="TOdds">
+          <span *ngIf="bets.value.betOdds.totalSlipOdds!=null; else noSlipOdds">
+            {{bets.value.betOdds.totalSlipOdds}}
+          </span>
+          <ng-template #noSlipOdds>
+            No Odds
+          </ng-template>
+        </td>
+        <td nzCellControl="SGPGroup">
+          <span *ngIf="bets.value.betGroup.betGroupID!=null">{{bets.value.betGroup.betGroupID}}</span>
+          <span *ngIf="bets.value.betGroup.betGroupStatus!=null;">
+            <span *ngIf="bets.value.betGroup.betGroupStatus===0">
+              Open
+            </span>
+            <span *ngIf="bets.value.betGroup.betGroupStatus===2">
+              Lost
+            </span>
+            <span *ngIf="bets.value.betGroup.betGroupStatus===3">
+              Won
+            </span>
+            <span *ngIf="bets.value.betGroup.betGroupStatus===5">
+              Cancelled
+            </span>
+          </span>
+          <span *ngIf="bets.value.betGroup.betGroupDecimalOdds!=null;">
+              {{bets.value.betGroup.betGroupDecimalOdds}}
+          </span>
+          <span *ngIf="bets.value.betGroup.betGroupUSOdds!=null;">
+              {{bets.value.betGroup.betGroupUSOdds}}
+          </span>
+          <span *ngIf="bets.value.betGroup.sgpPendingMins!=null;">
+              {{bets.value.betGroup.sgpPendingMins}} mins
+          </span>
+        </td>
+        <td nzCellControl="TimestampPayout">{{bets.value.payoutFinishedGMT}}<br />
+          <span *ngIf="bets.value.payoutResultStatus!='' && bets.value.payoutResultStatus!==null ">
+            {{bets.value.payoutResultStatus}}
+            <br /></span>
+          <span *ngIf="bets.value.betEPData.epAmount!=null">
+            Early Payout:{{bets.value.betEPData.epAmount}}
+          </span>
+        </td>
+        <td nzCellControl="ROdds-dec">
+          <span *ngIf="bets.value.betOdds.resultOdds!=null; else noResultOdds">
+            {{bets.value.betOdds.resultOdds}}
+          </span>
+          <ng-template #noResultOdds>
+            No Odds
+          </ng-template>
+        </td>
+        <td nzCellControl="ROdds-frac">
+          <span *ngIf="bets.value.fractionalOddsNumerator!=''">
+            {{bets.value.betOdds.fractionalOddsNumerator/bets.value.betOdds.fractionalOddsDenominator}}
+          </span>
+        </td>
+        <td nzCellControl="Label">{{bets.value.identifier.betLabel}}</td>
+        <td nzCellControl="Sport/Region"> {{bets.value.betTradingData.sportName}} <br />{{bets.value.betTradingData.regionName}}</td>
+
+
+        <!-- Might require at a later point of time by product.. Will delete them after first release. -->
+<!--        <td nzCellControl="UserId">{{bets.value.userId}}</td>
+        <td nzCellControl="SlipLanguage">{{bets.value.betSlipData.slipLanguage}}</td>
+        <td nzCellControl="TimeStampSlip"> {{bets.value.betSlipData.slipTimestamp}}</td>
+        <td nzCellControl="Bettype">
+          <span *ngIf="bets.value.identifier.key.systemSlipId!=null">System</span>
+          <span *ngIf="bets.value.isNonMaterializedSystem == 1; else showThis">System non-materialized</span>
+          <ng-template #showThis>
+            {{bets.value.type}}
+          </ng-template>
+          <span *ngIf="bets.value.isFreeBet > 0">(F)</span>
+          <span *ngIf="bets.value.numberOfProtectedResults !=''">
+            <br />Protected picks: {{bets.value.numberOfProtectedResults}}
+            <br />Fee: {{bets.value.betCurrency.protectionFeeBaseCurrency}} {{bets.value.betCurrency.protectionFeeAccountCurrency}}
+          </span>
+        </td>
+        <td nzCellControl="League/Meeting"> {{bets.value.betTradingData.leagueName}} <br /> {{bets.value.betTradingData.eventDate}}</td>
+        <td nzCellControl="SlipId">
+          <span *ngIf="bets.value.identifier.key.slipId!=''">
+            {{ bets.value.identifier.key.slipId }}
+          </span>
+        </td>
+        <td nzCellControl="SystemSlipID">
+          <span *ngIf="bets.value.identifier.key.systemSlipId!=''">
+            {{ bets.value.identifier.key.systemSlipId }}
+          </span>
+        </td>-->
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

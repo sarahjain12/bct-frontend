@@ -1,0 +1,16 @@
+#searchResultsLabelId {
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+.ant-divider-horizontal {
+  margin: 10px 0px;
+}
+
+::ng-deep .ant-divider-vertical {
+  height: 2rem;
+}
+
+#loading-text-center {
+  margin-left: 15px;
+}

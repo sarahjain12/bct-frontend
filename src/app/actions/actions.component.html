@@ -1,0 +1,105 @@
+<div *ngIf="(currentBets && currentBets.length>0) || isBatchBetSearch">
+<form nz-form class="action-form" [formGroup]="actionForm">
+    <div nz-row>
+      <nz-form-item>
+        <label *ngIf="!isBatchBetSearch && hasWritePermissions" nz-checkbox formControlName="checked" [(nzChecked)]="checked" (ngModelChange)="onAllChecked($event)"
+          [nzIndeterminate]="indeterminate">Select All</label>
+        <nz-divider nzType="vertical"></nz-divider>
+        <nz-form-control>
+          <nz-select nzSuffixIcon="caret-down" class="action-select" id="actionsDrop" name="actionsDrop"
+            formControlName="actionsDrop" nzPlaceHolder="Action" nzAllowClear (ngModelChange)="showModal()">
+            <nz-option *ngFor="let item of actionsOptions" [nzLabel]="item.viewValue" [nzValue]="item"></nz-option>
+          </nz-select>
+        </nz-form-control>
+        <nz-divider nzType="vertical"></nz-divider>
+      </nz-form-item>
+      <button *ngIf="!isBatchBetSearch" id="actionSettingButtonId" nz-button nzSize="small" (click)="showDragNDropModal()">
+        <span nz-icon nzType="setting" nzTheme="outline"></span>
+      </button>
+    </div>
+    <nz-modal *ngIf="!this.isActionTriggered" id="cancelpopup" [(nzVisible)]="isVisible" nzTitle={{actionPopupTitle}} (nzOnCancel)="handleCancel()" (nzOnOk)="onSubmit()">
+      <ng-container *nzModalContent>
+        <nz-form-item>
+          <div *ngIf=" this.selectedBets.length > 0 && !this.isActionTriggered && (this.selectedBets[0].identifier.betLabel == 'bwin.it' || this.selectedBets[0].identifier.betLabel == 'giocodigitale.it')" >
+           <div id="italianbetmarket">
+             <p><img src="assets/Exlamation_icon.png" class="exclamation_logo"> All the bets on the following markets after timestamp {{this.getEarliestTimestamp(this.selectedBets)}} UTC will be cancelled due to sharing AAMS market ID of selected markets.</p>
+              <table class = "italianMarkets">
+              <thead>
+              <tr>
+                <th class = "marketsHeader">EventID</th>
+                <th class = "marketsHeader">EventType</th>
+                <th class = "marketsHeader">GameID</th>
+                <th class = "marketsHeader">GameName</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container>
+              <tr *ngFor="let market of this.linkedMarkets">
+                <td>{{market.eventId}}</td>
+                <td *ngIf="market.eventLive">Live</td>
+                <td *ngIf="!market.eventLive">Main</td>
+                <td>{{market.gameId}}</td>
+                <td>{{market.gameName}}</td>
+              </tr>
+            </ng-container>
+            </tbody>
+            </table>
+          </div>
+          <div> Are you sure, you still want to cancel this bet? If so, Kindly provide the reason for cancellation. </div>
+          </div>
+          <nz-form-control>
+            <span>Reason</span>
+            <nz-select id="reason" name="reason" formControlName="reason" nzPlaceHolder="select reason">
+              <nz-option *ngFor="let reason of cancelReasonsOptions" [nzLabel]="reason.viewValue" [nzValue]="reason.id"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <span>Comment</span>
+            <input type="text" nz-input id="comments" name="comments" formControlName="comments" placeholder="Comments">
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
+    </nz-modal>
+  </form>
+
+</div>
+
+  <nz-modal [(nzVisible)]="isDragNDropModalVisible" nzTitle="Custom Column" (nzOnCancel)="handleCustomColumnCancel()"
+  (nzOnOk)="handleCustomColumnOk()">
+  <ng-container *nzModalContent>
+    <div nz-row [nzGutter]="24" class="drapNdropModal">
+      <div nz-col class="gutter-row" [nzSpan]="12">
+        <div class="example-container">
+          <p>Displayed (drag and drop to sort hidden columns)</p>
+          <div class="example-box" *ngFor="let item of title">
+            {{ item.name }}
+          </div>
+          <div cdkDropList #todoList="cdkDropList" [cdkDropListData]="fix" [cdkDropListConnectedTo]="[doneList]"
+            class="example-list" (cdkDropListDropped)="drop($event)">
+            <div class="example-box" *ngFor="let item of fix; let i = index" cdkDrag>
+              {{ item.name }}
+              <span nz-icon nzType="minus-circle" nzTheme="outline" (click)="deleteCustom(item, i)"></span>
+            </div>
+          </div>
+          <div class="example-box" *ngFor="let item of footer">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
+      <div nz-col class="gutter-row" [nzSpan]="12">
+        <div class="example-container">
+          <p>Not Shown</p>
+          <div cdkDropList #doneList="cdkDropList" [cdkDropListData]="notFix" [cdkDropListConnectedTo]="[todoList]"
+            class="example-list" (cdkDropListDropped)="drop($event)">
+            <div class="example-box" *ngFor="let item of notFix; let i = index" cdkDrag>
+              {{ item.name }}
+              <span nz-icon nzType="plus-circle" nzTheme="outline" (click)="addCustom(item, i)"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>

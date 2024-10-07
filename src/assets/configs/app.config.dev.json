@@ -1,0 +1,6 @@
+{
+  "version" : "1.0.0",
+  "env" : "dev",
+  "host": "https://bct-service.dev.env.works",
+  "batch_count": 1020
+}

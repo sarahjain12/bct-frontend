@@ -1,0 +1,11 @@
+
+<nz-modal *ngIf="isVisible" [(nzVisible)]="isVisible" nzTitle="Summary of Batch operation" (nzOnOk)="handleOk()" [nzCancelText]="null">
+    <ng-container *nzModalContent>
+      <p><b>Action: </b> {{ response.action }}</p>
+      <p><b>Bets original state: </b> {{ response.originalState }}</p>
+      <p><b>Charge ID: </b> {{ response.chargeId }}</p>
+      <p><b>Number of bets processed: </b> {{ response.result.cntTotal }}</p>
+      <p><b>Successfully processed: </b> {{ response.result.cntCompleted }}</p>
+      <p><b>Failed to process: </b> {{ response.result.cntFailed }}</p>
+    </ng-container>
+  </nz-modal>

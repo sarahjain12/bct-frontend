@@ -1,0 +1,19 @@
+<div>
+  <!--<form ngNoForm action="{{logoutUrl}}" method="post">
+    <button nz-button [nzType]="'default'" type="submit">Sign out</button>
+  </form>-->
+  <div>
+    <nz-avatar nzIcon="user" nzSize="small"></nz-avatar>
+    <a nz-dropdown nzTrigger="click" [nzDropdownMenu]="menu">
+        {{this.userName}}
+      <span nz-icon nzType="down"></span>
+    </a>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu>
+        <li nz-menu-item>
+          <button nz-button nzType="text" nzBlock (click)="logout()">Logout</button>
+        </li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</div>

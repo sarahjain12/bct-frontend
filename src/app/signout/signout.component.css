@@ -1,0 +1,13 @@
+[nz-button]
+{
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.anticon{
+  color:white !important;
+}
+
+a:not([href]):not([tabindex]){
+  color : white !important;
+}
